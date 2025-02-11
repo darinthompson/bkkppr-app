@@ -23,7 +23,8 @@ func ConnectDatabase(cfg *config.Config) {
 	log.Println("Database connected successfully")
 
 	// AutoMigrate to create tables
-	db.AutoMigrate(&models.User{}, &models.Book{})
+	db.Migrator().DropTable(&models.User{}, &models.Book{}, &models.Checkout{})
+	db.AutoMigrate(&models.User{}, &models.Book{}, &models.Checkout{})
 
 	DB = db
 }
