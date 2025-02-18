@@ -35,7 +35,3 @@ func GetBooksHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, books)
 }
-
-// func GetBooksByUserID(c *gin.Context) {
-// 	books, err models.Book
-// }

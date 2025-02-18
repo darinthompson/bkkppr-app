@@ -18,7 +18,7 @@ func GetUsers() ([]models.User, error) {
 
 func GetUserByID(userID uint) (*models.User, error) {
 	var user models.User
-	err := DB.Debug().Preload("Books").First(&user, userID).Error
+	err := DB.Preload("Books").First(&user, userID).Error
 	if err != nil {
 		log.Printf("ERROR FETCHING USER WITH ID: %d: %v", userID, err)
 		return nil, err
