@@ -23,6 +23,11 @@ func main() {
 	// Define routes
 	r.POST("/users", handlers.CreateUserHandler)
 	r.GET("/users", handlers.GetUsersHandler)
+	r.GET("/users/:id", handlers.GetUserByID)
+
+	r.POST("/books", handlers.CreateBookhandler)
+	r.GET("/books", handlers.GetBooksHandler)
+	r.GET("/user/books", handlers.GetAll)
 
 	// Start server
 	log.Println("Server is running on port", cfg.Port)
