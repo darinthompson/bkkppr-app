@@ -21,7 +21,7 @@ func main() {
 	r := gin.Default()
 
 	// Define routes
-	r.POST("/users", handlers.CreateUserHandler)
+	r.POST("/register", handlers.CreateUserHandler)
 	r.GET("/users", handlers.GetUsersHandler)
 	r.GET("/users/:id", handlers.GetUserByID)
 

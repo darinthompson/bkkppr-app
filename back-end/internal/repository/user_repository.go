@@ -26,6 +26,16 @@ func GetUserByID(userID uint) (*models.User, error) {
 	return &user, nil
 }
 
+func GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	result := DB.Where("username = ?", username).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
+
 func GetAll() ([]models.User, error) {
 	var users []models.User
 	err := DB.Model(&models.User{}).Preload("Books").Find(&users).Error

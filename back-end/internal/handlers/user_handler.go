@@ -7,6 +7,7 @@ import (
 
 	"github.com/darinthompson/bkkppr-app/internal/models"
 	"github.com/darinthompson/bkkppr-app/internal/repository"
+	"github.com/darinthompson/bkkppr-app/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,10 +15,18 @@ import (
 // CreateUserHandler handles creating a new user
 func CreateUserHandler(c *gin.Context) {
 	var user models.User
+
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	user.Password = hashedPassword
 
 	if err := repository.CreateUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -48,6 +57,11 @@ func GetUserByID(c *gin.Context) {
 	// Return the user as JSON
 	c.JSON(http.StatusOK, user)
 }
+
+// func GetUserByUsername(username string) (user *models.User, error) {
+// 	var user models.User
+// 	result :=
+// }
 
 // GetUsersHandler handles retrieving all users
 func GetUsersHandler(c *gin.Context) {
