@@ -21,13 +21,13 @@ func main() {
 	r := gin.Default()
 
 	// Define routes
-	r.POST("/register", handlers.CreateUserHandler)
+	r.POST("/signup", handlers.CreateUserHandler)
+	r.POST("/login", handlers.Login)
 	r.GET("/users", handlers.GetUsersHandler)
 	r.GET("/users/:id", handlers.GetUserByID)
 
 	r.POST("/books", handlers.CreateBookhandler)
 	r.GET("/books", handlers.GetBooksHandler)
-	r.GET("/user/books", handlers.GetAll)
 
 	// Start server
 	log.Println("Server is running on port", cfg.Port)

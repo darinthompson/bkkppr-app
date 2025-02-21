@@ -36,6 +36,23 @@ func CreateUserHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": user})
 }
 
+func Login(c *gin.Context) {
+	var authBody = models.AuthInput{}
+
+	if c.Bind(&authBody) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error logging in"})
+		return
+	}
+
+	user, err := repository.Login(authBody)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 func GetUserByID(c *gin.Context) {
 	userID := c.Param("id") // Extract user ID from URL
 
@@ -58,25 +75,11 @@ func GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// func GetUserByUsername(username string) (user *models.User, error) {
-// 	var user models.User
-// 	result :=
-// }
-
 // GetUsersHandler handles retrieving all users
 func GetUsersHandler(c *gin.Context) {
 	users, err := repository.GetUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
-		return
-	}
-	c.JSON(http.StatusOK, users)
-}
-
-func GetAll(c *gin.Context) {
-	users, err := repository.GetAll()
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Failed to fetch users and books"})
 		return
 	}
 	c.JSON(http.StatusOK, users)
