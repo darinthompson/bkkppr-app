@@ -5,6 +5,7 @@ import (
 
 	"github.com/darinthompson/bkkppr-app/internal/config"
 	"github.com/darinthompson/bkkppr-app/internal/handlers"
+	"github.com/darinthompson/bkkppr-app/internal/middleware"
 	"github.com/darinthompson/bkkppr-app/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -21,13 +22,14 @@ func main() {
 	r := gin.Default()
 
 	// Define routes
-	r.POST("/users", handlers.CreateUserHandler)
+	r.POST("/signup", handlers.CreateUserHandler)
+	r.POST("/login", handlers.Login)
+	r.GET("/validate", middleware.RequireAuth, handlers.Validate)
 	r.GET("/users", handlers.GetUsersHandler)
 	r.GET("/users/:id", handlers.GetUserByID)
 
 	r.POST("/books", handlers.CreateBookhandler)
 	r.GET("/books", handlers.GetBooksHandler)
-	r.GET("/user/books", handlers.GetAll)
 
 	// Start server
 	log.Println("Server is running on port", cfg.Port)
