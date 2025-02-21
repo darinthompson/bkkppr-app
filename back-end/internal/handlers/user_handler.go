@@ -2,12 +2,16 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/darinthompson/bkkppr-app/internal/models"
 	"github.com/darinthompson/bkkppr-app/internal/repository"
 	"github.com/darinthompson/bkkppr-app/internal/utils"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,7 +54,30 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		log.Println("ERROR: SECRET_KEY environment variable is not set")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte(secretKey))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error Creating Token"})
+		return
+	}
+
+	fmt.Println(tokenString, err)
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
 }
 
 func GetUserByID(c *gin.Context) {
@@ -83,4 +110,13 @@ func GetUsersHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, users)
+}
+
+func Validate(c *gin.Context) {
+
+	user, _ := c.Get("user")
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": user,
+	})
 }
