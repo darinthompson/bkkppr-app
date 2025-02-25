@@ -1,7 +1,8 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
+import './login.css'
 import axios from 'axios';
-
+import { useNavigate } from "react-router-dom";
 function Auth() {
   const [hasAccount, setHasAccount] = useState(true);
   const [formValues, setFormValues] = useState({
@@ -20,13 +21,28 @@ function Auth() {
     }));
   };
 
+  const navigate = useNavigate();
   const handleSubmit = () => {
     console.log(formValues);
-    axios.post('/signup', formValues);
+    if(hasAccount) {
+      axios.post('/login', {
+        userName: formValues.username,
+        password: formValues.password
+      }).then((res) => {
+        console.log('RES: ', res);
+        navigate('/welcome');
+      })
+    } else {
+      axios.post('/signup', formValues).then((res) => {
+        console.log('RES: ', res.data);
+        navigate('/welcome')
+      })
+    }
+
   };
 
   return (
-    <Box sx={{ padding: 30, display: "inline-flex", flexDirection: "column" }}>
+    <Box sx={{padding: 30, display: "inline-flex", flexDirection: "column"}}>
       <Typography color="#d1d5de" variant="h3" sx={{mb:4}}>Welcome To Bkkppr</Typography>
       {!hasAccount && (
         <>

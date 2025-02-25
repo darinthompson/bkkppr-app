@@ -1,9 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
 import { ThemeProvider } from '@emotion/react'
 import createTheme from '@mui/material/styles/createTheme'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Auth from './Components/Login-Auth/login.tsx'
+import Welcome from './Components/Welcome/welcome.tsx'
+import { CssBaseline } from '@mui/material'
 
 const theme = createTheme({
   components: {
@@ -41,7 +44,12 @@ const theme = createTheme({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <App />
+      <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Auth />} />
+            <Route path="/welcome" element={<Welcome />} />
+          </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>,
 )

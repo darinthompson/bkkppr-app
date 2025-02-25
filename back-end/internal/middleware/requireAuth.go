@@ -52,7 +52,7 @@ func RequireAuth(c *gin.Context) {
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 
 		c.Next()
-		fmt.Println(claims["foo"], claims["nbf"])
+		log.Println(claims["foo"], claims["nbf"])
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}

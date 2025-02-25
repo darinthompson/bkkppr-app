@@ -32,7 +32,7 @@ func Login(authInput models.AuthInput) (*models.User, error) {
 	var user models.User
 	err := DB.Preload("Books").First(&user, "username = ? ", authInput.Username).Error
 	if err != nil {
-		log.Printf("ERROR FETCHING USER WITH EMAIL: %v: %v", authInput.Username, err)
+		log.Printf("ERROR FETCHING USER WITH USERNAME: %v: %v", authInput.Username, err)
 		return nil, err
 	}
 

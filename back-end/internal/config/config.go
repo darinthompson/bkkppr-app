@@ -22,7 +22,7 @@ func LoadConfig() *Config {
 
 	return &Config{
 		Port:        getEnv("PORT", "8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "root:password@tcp(localhost:3306)/bkkppr?charset=utf8mb4&parseTime=True&loc=Local"),
+		DatabaseURL: getEnv("DATABASE_URL", "root:root@tcp(localhost:3306)/bkkppr?charset=utf8mb4&parseTime=True&loc=Local"),
 	}
 }
 

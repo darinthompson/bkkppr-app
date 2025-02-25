@@ -11,6 +11,16 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/login': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/books': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
       // You can add more routes here if needed.
     },
   },
