@@ -3,14 +3,13 @@ import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 
 interface BookCardProps {
-  title: string;
-  author: string;
-  genre: string;
-  publishDate: string;
-  isCheckedOut: boolean;
+  title?: string;
+  author?: string;
+  genre?: string;
+  publish_date?: string;
 }
 
-const BookCard: React.FC<BookCardProps> = ({ title, author, genre, publishDate, isCheckedOut }) => {
+const BookCard: React.FC<BookCardProps> = ({ title, author, genre, publish_date }) => {
   return (
     <Card sx={{ maxWidth: 345, margin: '1rem' }}>
       <CardContent>
@@ -22,10 +21,7 @@ const BookCard: React.FC<BookCardProps> = ({ title, author, genre, publishDate, 
         </Typography>
         <Box sx={{ mt: 2 }}>
           <Typography variant="body2">Genre: {genre}</Typography>
-          <Typography variant="body2">Published: {publishDate}</Typography>
-          <Typography variant="body2">
-            Status: {isCheckedOut ? "Checked Out" : "Available"}
-          </Typography>
+          <Typography variant="body2">Published: {publish_date}</Typography>
         </Box>
       </CardContent>
     </Card>

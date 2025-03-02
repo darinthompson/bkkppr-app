@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Checkbox, FormControlLabel, Button, Box } from '@mui/material';
-import axios from 'axios';
+import { Book } from '../../models/Book';
 
 interface BookFormValues {
   title: string;
@@ -10,16 +10,20 @@ interface BookFormValues {
   isCheckedOut: boolean;
 }
 
-const initialFormValues: BookFormValues = {
+const initialFormValues: Book = {
   title: '',
   author: '',
-  genre: '',
-  publishDate: '',
-  isCheckedOut: false,
+  Genre: '',
+  Publish_Date: '',
 };
 
-const BookForm: React.FC = () => {
-  const [formValues, setFormValues] = useState<BookFormValues>(initialFormValues);
+interface BookFormProps {
+  addBook: (book: Book) => void;
+  closeForm: () => void;
+}
+
+const BookForm: React.FC<BookFormProps>  = ({addBook, closeForm}) => {
+  const [formValues, setFormValues] = useState<Book>(initialFormValues);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -31,8 +35,9 @@ const BookForm: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    axios.post('/books', formValues);
+    addBook(formValues);
     console.log(formValues);
+    closeForm();
   };
 
   return (
@@ -69,21 +74,21 @@ const BookForm: React.FC = () => {
         sx={{ m: 2 }}
         variant="outlined"
         id="genre"
-        name="genre"
+        name="Genre"
         label="Genre"
-        value={formValues.genre}
+        value={formValues.Genre}
         onChange={handleChange}
       />
       <TextField
         sx={{ m: 2 }}
         variant="outlined"
         id="publishDate"
-        name="publishDate"
+        name="Publish_Date"
         label="Publish Date"
-        value={formValues.publishDate}
+        value={formValues.Publish_Date}
         onChange={handleChange}
       />
-      <FormControlLabel
+      {/* <FormControlLabel
         sx={{ m: 2 }}
         control={
           <Checkbox
@@ -94,7 +99,7 @@ const BookForm: React.FC = () => {
           />
         }
         label="Checked Out"
-      />
+      /> */}
       <Button type="submit" variant="contained" sx={{ m: 2 }}>
         Submit
       </Button>

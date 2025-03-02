@@ -18,26 +18,60 @@ import (
 
 // CreateUserHandler handles creating a new user
 func CreateUserHandler(c *gin.Context) {
-	var user models.User
+	var newUser models.User
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
-	user.Password = hashedPassword
+	newUser.Password = hashedPassword
 
-	if err := repository.CreateUser(&user); err != nil {
+	if err := repository.CreateUser(&newUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": user})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": newUser.ID,                            // Store user ID in token
+		"exp": time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+	})
+
+	// Get the secret key
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		log.Println("ERROR: SECRET_KEY environment variable is not set")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	// Sign the token
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	// Set token in a cookie (optional)
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
+
+	// Return the token and user data to the frontend
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User created successfully",
+		"user": gin.H{
+			"id":       newUser.ID,
+			"username": newUser.Username,
+		},
+		"token": tokenString, // Send token so frontend can store it
+	})
+
+	// c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": newUser})
 }
 
 func Login(c *gin.Context) {
@@ -78,6 +112,16 @@ func Login(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", tokenString, 3600*24, "", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User created successfully",
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.Username,
+		},
+		"token": tokenString, // Send token so frontend can store it
+	})
+
 }
 
 func GetUserByID(c *gin.Context) {

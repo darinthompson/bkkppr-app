@@ -21,24 +21,30 @@ function Auth() {
     }));
   };
 
+  const authenticateUser = async (hasAccount: boolean, userData: unknown) => {
+    const endpoint: string = hasAccount ? "/login" : "/signup";
+
+    // Perform API request
+    const response = await axios.post(endpoint, userData);
+
+    // Extract data from response
+    const { token, user } = response.data;
+    console.log("RES: ", response.data);
+
+    // Store token & user data in localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // Navigate to welcome page
+    navigate("/welcome");
+  }
+
   const navigate = useNavigate();
   const handleSubmit = () => {
-    console.log(formValues);
-    if(hasAccount) {
-      axios.post('/login', {
-        userName: formValues.username,
-        password: formValues.password
-      }).then((res) => {
-        console.log('RES: ', res);
-        navigate('/welcome');
-      })
-    } else {
-      axios.post('/signup', formValues).then((res) => {
-        console.log('RES: ', res.data);
-        navigate('/welcome')
-      })
-    }
-
+    authenticateUser(hasAccount, {
+      username: formValues.username,
+      password: formValues.password
+    });
   };
 
   return (

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/darinthompson/bkkppr-app/internal/models"
 	"github.com/darinthompson/bkkppr-app/internal/repository"
@@ -17,7 +18,10 @@ func CreateBookhandler(c *gin.Context) {
 		return
 	}
 
-	book.UserID = 1
+	// userInterface, exists := c.Get("user")
+	// if !exists {
+	// 	c.JSON()
+	// }
 
 	if err := repository.CreateBook(&book); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create book"})
@@ -33,5 +37,26 @@ func GetBooksHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch books"})
 		return
 	}
+	c.JSON(http.StatusOK, books)
+}
+
+func GetBooksByUserId(c *gin.Context) {
+	userIDParam := c.Param("id")
+
+	// Convert ID from string to uint
+	userID, err := strconv.ParseUint(userIDParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Fetch books using repository function
+	books, err := repository.GetBooksByUserId(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch books"})
+		return
+	}
+
+	// Return books as JSON
 	c.JSON(http.StatusOK, books)
 }

@@ -13,48 +13,77 @@ import (
 )
 
 func RequireAuth(c *gin.Context) {
-	tokenString, err := c.Cookie("Authorization")
+	// Try to get the token from the Authorization header first
+	tokenString := c.GetHeader("Authorization")
 
-	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+	// If the token is not in the header, check for the cookie
+	if tokenString == "" {
+		var err error
+		tokenString, err = c.Cookie("Authorization")
+		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
 	}
 
+	// Parse the JWT token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
+		// Ensure the signing method is HMAC
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("SECRET_KEY")), nil
+		secretKey := os.Getenv("SECRET_KEY")
+		if secretKey == "" {
+			log.Println("ERROR: SECRET_KEY is not set")
+			return nil, fmt.Errorf("missing SECRET_KEY")
+		}
+		return []byte(secretKey), nil
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.AbortWithStatus(http.StatusUnauthorized)
-		}
-
-		// userIdFloat := claims["sub"].(float64)
-		// userID := (uint)userIdFloat
-
-		user, err := repository.GetUserByID(uint(claims["sub"].(float64)))
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-		}
-
-		if user.ID == 0 {
-			c.AbortWithStatus(http.StatusUnauthorized)
-		}
-		c.Set("user", user)
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-
-		c.Next()
-		log.Println(claims["foo"], claims["nbf"])
-	} else {
+	if err != nil || !token.Valid {
+		log.Println("Invalid token:", err)
 		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
+	// Extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Check expiration
+	exp, ok := claims["exp"].(float64)
+	if !ok || float64(time.Now().Unix()) > exp {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Extract user ID safely
+	sub, ok := claims["sub"].(float64)
+	if !ok {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	userID := uint(sub)
+
+	// Fetch user from database
+	user, err := repository.GetUserByID(userID)
+	if err != nil {
+		log.Println("User not found:", err)
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	if user.ID == 0 {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Attach user to context
+	c.Set("user", user)
+
+	// Proceed with the request
+	c.Next()
 }

@@ -24,12 +24,18 @@ func main() {
 	// Define routes
 	r.POST("/signup", handlers.CreateUserHandler)
 	r.POST("/login", handlers.Login)
-	r.GET("/validate", middleware.RequireAuth, handlers.Validate)
-	r.GET("/users", handlers.GetUsersHandler)
-	r.GET("/users/:id", handlers.GetUserByID)
 
-	r.POST("/books", handlers.CreateBookhandler)
-	r.GET("/books", handlers.GetBooksHandler)
+	authRoutes := r.Group("/")
+	authRoutes.Use(middleware.RequireAuth)
+	{
+		r.GET("/validate", middleware.RequireAuth, handlers.Validate)
+		r.GET("/users", handlers.GetUsersHandler)
+		r.GET("/users/:id", handlers.GetUserByID)
+		r.GET("api/users/:id/books", handlers.GetBooksByUserId)
+
+		r.POST("/books", handlers.CreateBookhandler)
+		r.GET("/books", handlers.GetBooksHandler)
+	}
 
 	// Start server
 	log.Println("Server is running on port", cfg.Port)
